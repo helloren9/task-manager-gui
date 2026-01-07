@@ -6,6 +6,8 @@ import os
 
 TASKS_FILE = "tasks.csv"
 
+editing_task = None
+
 class Task:
     def __init__(self, task_id, description, completed=False, priority="medium", due_date=None):
         self.id = task_id
@@ -85,8 +87,17 @@ def add_task_gui():
     else:
         due = None
 
-    task_id = len(tasks) + 1
-    tasks.append(Task(task_id, desc, False, priority, due))
+    global editing_task
+
+    if editing_task:
+        editing_task.description = desc
+        editing_task.priority = priority
+        editing_task.due_date = due
+        editing_task = None
+    else:
+        task_id = len(tasks) + 1
+        tasks.append(Task(task_id, desc, False, priority, due))
+
     save_tasks(tasks)
     refresh_tasks()
 
@@ -100,6 +111,26 @@ def get_selected_task():
         return None
     index = selection[0]
     return tasks[index]
+
+def load_task_for_edit():
+    global editing_task
+    task = get_selected_task()
+    if not task:
+        messagebox.showerror("Error", "Select a task to edit")
+        return
+    
+    editing_task = task
+    
+    entry_desc.delete(0, tk.END)
+    entry_desc.insert(0, task.description)
+
+    priority_var.set(task.priority)
+
+    entry_due.delete(0, tk.END)
+    if task.due_date:
+        entry_due.insert(0, task.due_date)
+    else:
+        entry_due.insert(0, "")
 
 def complete_task_gui():
     task = get_selected_task()
@@ -141,6 +172,7 @@ tk.Button(root, text="Add Task", command=add_task_gui).pack(pady=5)
 
 tk.Button(root, text="Complete Task", command=complete_task_gui).pack()
 tk.Button(root, text="Delete Task", command=delete_task_gui).pack()
+tk.Button(root, text="Edit Task", command=lambda: load_task_for_edit()).pack()
 
 refresh_tasks()
 
