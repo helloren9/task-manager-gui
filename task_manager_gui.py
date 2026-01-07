@@ -8,6 +8,12 @@ TASKS_FILE = "tasks.csv"
 
 editing_task = None
 
+PRIORITY_ORDER = {
+    "high" : 1,
+    "medium": 2,
+    "low": 3
+}
+
 class Task:
     def __init__(self, task_id, description, completed=False, priority="medium", due_date=None):
         self.id = task_id
@@ -68,6 +74,10 @@ def refresh_tasks():
             tk.END,
             f"{task.id}. {task.description} | {task.priority.upper()} | Due: {due} | {status}{overdue}"
         )
+
+def sort_task_by_priority():
+    tasks.sort(key=lambda task: PRIORITY_ORDER.get(task.priority, 99))
+    refresh_tasks()
 
 def add_task_gui():
     desc = entry_desc.get()
@@ -150,7 +160,7 @@ def delete_task_gui():
 
 root = tk.Tk()
 root.title("Task Manager")
-root.geometry("600x400")
+root.geometry("600x430")
 
 tasks = load_tasks()
 
@@ -173,6 +183,7 @@ tk.Button(root, text="Add Task", command=add_task_gui).pack(pady=5)
 tk.Button(root, text="Complete Task", command=complete_task_gui).pack()
 tk.Button(root, text="Delete Task", command=delete_task_gui).pack()
 tk.Button(root, text="Edit Task", command=lambda: load_task_for_edit()).pack()
+tk.Button(root, text="Sort by Priority", command=sort_task_by_priority).pack(pady=5)
 
 refresh_tasks()
 
